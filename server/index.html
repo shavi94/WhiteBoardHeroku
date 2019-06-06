@@ -1,0 +1,117 @@
+<!doctype html>
+<head>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
+	<title>Drawing App</title>
+	<link rel="stylesheet" href="/static/master.css">
+</head>
+<body>
+	<div id="toolbar">
+		<div id="rad">
+			Radius <span id="radval">2</span>
+			<div id="decrad" class="radcontrol">-</div>
+			<div id="incrad" class="radcontrol">+</div>
+		</div>
+		<div id="colors">
+			<div class="swatch active" style="background-color: black"></div>
+			<div class="swatch" style="background-color: red"></div>
+			<div class="swatch" style="background-color: blue"></div>
+		</div>
+		<div id="erasers">
+			<div id="normalEraser" class="erase">Eraser</div>
+			<div id="lineEraser" class="erase">Line Eraser</div>
+		</div>
+	</div>
+	<canvas id="canvas" width="550px" height="300px" style="border:1px solid; 
+		display:block;">
+		
+	</canvas>
+	<script src="/static/main.js" type="text/javascript"></script>
+	<script src="/static/radius.js" type="text/javascript"></script>
+	<script src="/static/colors.js" type="text/javascript"></script>
+	<script src="/static/eraser.js" type="text/javascript"></script>
+	<script>
+		window.onload = function(){
+		socket = io.connect('http://127.0.0.1:3000/');
+		socket.on('mouse',newDrawing);
+		socket.on('erase',newErasing);
+		socket.on('eraseline',newErasingLine);
+
+		}
+
+		function newErasingLine(data){
+			context.globalCompositeOperation = 'destination-out';
+			context.lineWidth = data.radius*2.5;
+			if(data.state){
+				context.lineTo(data.x, data.y);
+				context.stroke();
+				context.beginPath();
+				context.arc(data.x, data.y, data.radius*1.2, 0, Math.PI*2);
+				context.fill();
+				context.beginPath();
+				context.moveTo(data.x, data.y);
+			}else{
+				context.beginPath(); 
+				context.lineTo(data.x, data.y);
+				context.stroke();
+				context.beginPath();
+				context.arc(data.x, data.y, data.radius*1.2, 0, Math.PI*2);
+				context.fill();
+				context.beginPath();
+				context.moveTo(data.x, data.y);
+			}
+		}
+
+		function newErasing(data){
+			context.globalCompositeOperation = 'destination-out';
+			context.lineWidth = data.radius*2;
+			if(data.state){
+				context.lineTo(data.x, data.y);
+				context.stroke();
+				context.beginPath();
+				context.arc(data.x, data.y, data.radius, 0, Math.PI*2);
+				context.fill();
+				context.beginPath();
+				context.moveTo(data.x, data.y);
+			}else{
+				context.beginPath(); 
+				context.lineTo(data.x, data.y);
+				context.stroke();
+				context.beginPath();
+				context.arc(data.x, data.y, data.radius, 0, Math.PI*2);
+				context.fill();
+				context.beginPath();
+				context.moveTo(data.x, data.y);
+			}
+		}
+
+		function newDrawing(data){
+			context.globalCompositeOperation = 'source-over';
+			if(data.state){
+				context.lineWidth = data.radius*2;
+				context.fillStyle = data.color;
+				context.strokeStyle = data.color;
+				context.lineTo(data.x, data.y);
+				context.stroke();
+				context.beginPath();
+				context.arc(data.x, data.y, data.radius, 0, Math.PI*2);
+				context.fill();
+				context.beginPath();
+				context.moveTo(data.x, data.y);
+			}else{
+				context.beginPath(); 
+				context.lineWidth = data.radius*2;
+				context.fillStyle = data.color;
+				context.strokeStyle = data.color;
+				context.lineTo(data.x, data.y);
+				context.stroke();
+				context.beginPath();
+				context.arc(data.x, data.y, data.radius, 0, Math.PI*2);
+				context.fill();
+				context.beginPath();
+				context.moveTo(data.x, data.y);
+			}
+
+		}
+	</script>
+</body>
+</html>
