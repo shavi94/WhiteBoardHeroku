@@ -2,7 +2,7 @@ var path = require('path');
 var express = require('express');
 var app = express();
 var socket = require('socket.io');
-
+const port=process.env.PORT || 3000;
 app.use('/static', express.static('pub'));
 
 //Create HTTP server and listen on port 3000 for requests
@@ -10,7 +10,7 @@ app.get('/',function(req,res){
     res.sendFile(path.join(__dirname,'index.html'));
 })
 
-var server = app.listen(3000);
+var server = app.listen(port);
 
 var io = socket(server);
 
