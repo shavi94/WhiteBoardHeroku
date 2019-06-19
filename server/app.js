@@ -3,14 +3,18 @@ var express = require('express');
 var app = express();
 var socket = require('socket.io');
 var usernames = [];
+var upload = require('express-fileupload');
+var newfileget;
+
+app.use(upload());
 
 app.use('/static', express.static('pub'));
 
-//Create HTTP server and listen on port 3000 for requests
 app.get('/',function(req,res){
     res.sendFile(path.join(__dirname,'index.html'));
-})
+});
 
+//Create HTTP server and listen on port 3000 for requests
 var server = app.listen(process.env.PORT || 3000);
 
 var io = socket(server);
@@ -25,6 +29,13 @@ function newConnection(socket){
     socket.on('eraseline',eraseLineMsg);
     socket.on('sendmessage',sendmessage);
     socket.on('new user',newUser);
+    socket.on('file', sharefile);
+
+    //share files
+    function sharefile(dataURI,type){
+        var name = socket.username;
+        socket.broadcast.emit('file', dataURI,type,name);
+    }
 
     //new user connect
     function newUser(data,callback){
@@ -71,7 +82,7 @@ function newConnection(socket){
 
     //disconnect
     socket.on('disconnect',function(data){
-        console.log("Client has disconnected");
+        console.log(socket.username +" has disconnected");
         if(!socket.username){
             return;
         }

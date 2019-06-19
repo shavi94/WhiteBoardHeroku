@@ -13,7 +13,6 @@
 	width: 552px;
 	height: 50px;
 	padding: 10px;
-	position: fixed;
 	top: 0;
 	background-color: #2f2f2f;
 	color: white;
@@ -76,7 +75,7 @@ body{
 }
 
 #chatWindow{
-	height: 300px;
+	height: 400px;
 }
 
 #mainWrapper{
@@ -93,6 +92,8 @@ body{
 	border-radius: 10px;
 	background: #f4f4f4;
 	padding: 10px;
+	width: 370px;
+	word-wrap: break-word;
 }
 
 #userWrapper{
@@ -118,4 +119,16 @@ body{
 
 input{
 	height: 30px;
+}
+
+.ScrollStyle
+{
+    max-height: 300px;
+	overflow-y: scroll;
+	
+}
+
+form
+{
+	padding: 5px;
 }

@@ -1,5 +1,6 @@
 <!doctype html>
 <head>
+	<meta charset="utf-8">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 	<title>Drawing App</title>
@@ -41,11 +42,15 @@
 		<div id="mainWrapper">
 			<h2>ChatIO</h2>
 			<div id="chatWrapper">
-				<div id="chatWindow"></div>
+				<div id="chatWindow" class="ScrollStyle"></div>
 				<form id="messageForm">
 					<input type="text" size="35" id="message" placeholder="say something...">
-					<input type="submit" value="submit">
+					<input type="submit" value="send">
 				</form>
+				<form id="upload" action="">
+					<input type="file" name="fileselect" id="fileselect">
+					<button>Upload!</button>
+				  </form>
 			</div>
 
 			<div id="userWrapper">
@@ -65,6 +70,7 @@
 			socket.on('eraseline',newErasingLine);
 			socket.on('sendmessage',newnewmessage);
 			socket.on('usernames',getUsernames);
+			socket.on('file',sharefile);
 			
 			var $messageForm = $('#messageForm');
 			var $message = $('#message');
@@ -72,12 +78,91 @@
 			var $users = $('#users');
 			var $username = $('#username');
 			var $error = $('#error');
+			var $newfileup = $('#fileupload')
+
+			
+			var imageReader = new FileReader();
+			var videoReader = new FileReader();
+			var file;
+
+			$('#fileselect').change(function(e){
+    
+				// get file object from file selector input
+				file = e.target.files[0];   
+
+			});
+
+			$('#upload').submit(function(){
+
+				if (file){
+
+					if (file.type.substring(0,5) === 'image' || file.type.substring(0,5) === 'video'){
+					
+						// if (file.size > MAX_UPLOAD_SIZE * 1000 * 1000)
+						// {
+						// 	alert('Sorry, we can only accept files up to ' + MAX_UPLOAD_SIZE + ' MB');
+						// }
+						// else 
+						if (file.type.substring(0,5) === 'image'){
+							
+							// upload image  
+							imageReader.readAsDataURL(file);
+						}
+						else if (file.type.substring(0,5) === 'video'){
+							
+							// uplaod video  
+							videoReader.readAsDataURL(file);
+						}
+					}
+					else {
+						alert("Sorry, you an only share images or videos");
+					}
+
+					// reset select box and file object 
+					$('#fileselect').val('');
+					file = '';
+				}
+				else
+				{
+					alert("You haven't selected any file to share");
+				}
+
+				return false; // don't reload the page
+			});
+
+
+			imageReader.onload=function(e){
+    
+				// append image to own interface
+				$('#chatWindow').append('<strong>Me </strong>: <li><img src="' + e.target.result + '" height="150px" /><li>');
+				
+				scrollDown();
+
+				// share image
+				socket.emit('file',e.target.result,'image');
+			};
+
+			videoReader.onload=function(e){
+    
+				// append video to own interface
+				$('#chatWindow').append('<strong>Me </strong>: <li><video width="320" height="240" controls><source src="' + e.target.result + '"><li>');
+				
+				scrollDown();
+				
+				// share video
+				socket.emit('file',e.target.result,'video');
+			};
+
 
 
 			$usernameForm.submit(function(e){
 				e.preventDefault();
 				console.log($username.val());
-				socket.emit('new user',$username.val(),newUser);
+				if($username.val()==""){
+					$('#error').html("username is not valid");
+				}else{
+					socket.emit('new user',$username.val(),newUser);
+				}
 			});
 
 			$messageForm.submit(function(e){
@@ -85,9 +170,28 @@
 				socket.emit('sendmessage',$message.val());
 				$('#chatWindow').append('<strong>Me </strong>: '+$message.val()+ '<br>');
 				$message.val('');
+				scrollDown();
 			});
 
 		});
+
+		function sharefile(dataURI,type,name){
+			appendFile(dataURI,type,name);
+		}
+
+
+		
+		function appendFile(URI,type,name){
+
+			if (type === 'image'){
+				$('#chatWindow').append('<strong>'+name+'</strong> : <br><li><img src="' + URI + '" height="150px" /><li>');
+						scrollDown();
+			}
+			else {
+				$('#chatWindow').append('<strong>'+name+'</strong> : <br><li><video width="320" height="240" controls><source src="' + URI + '"><li>');
+						scrollDown();
+			}
+		}
 
 		function getUsernames(data){
 			var html = '';
@@ -109,6 +213,7 @@
 
 		function newnewmessage(data){
 			$('#chatWindow').append('<strong>'+data.user+'</strong> : '+data.msg+ '<br>');
+			scrollDown();
 
 		}
 
@@ -185,6 +290,10 @@
 				context.moveTo(data.x, data.y);
 			}
 
+		}
+
+		function scrollDown(){
+			$('#chatWindow').animate({scrollTop: $('#chatWindow').prop("scrollHeight")}, 500); 
 		}
 	</script>
 </body>
