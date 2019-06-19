@@ -3,10 +3,7 @@ var express = require('express');
 var app = express();
 var socket = require('socket.io');
 var usernames = [];
-var upload = require('express-fileupload');
-var newfileget;
 
-app.use(upload());
 
 app.use('/static', express.static('pub'));
 
