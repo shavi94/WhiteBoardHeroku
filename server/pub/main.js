@@ -69,10 +69,19 @@ var putPoint = function(e){
 
 			var arrId;
 			for(var x=0; x<arr.length;x++){
-				if(arr[x][1].x == e.offsetX && arr[x][1].y == e.offsetY){
-					console.log("found");
-					arrId = arr[x][0];
-					context.lineWidth = arr[x][1].rad*2.5;
+				for(var l=0; l<5;l++){
+					if((arr[x][1].x + l == e.offsetX && arr[x][1].y + l == e.offsetY)||
+					(arr[x][1].x - l == e.offsetX && arr[x][1].y - l == e.offsetY)||
+					(arr[x][1].x + l == e.offsetX && arr[x][1].y - l == e.offsetY)||
+					(arr[x][1].x - l == e.offsetX && arr[x][1].y + l == e.offsetY)||
+					(arr[x][1].x == e.offsetX && arr[x][1].y + l == e.offsetY)||
+					(arr[x][1].x + l == e.offsetX && arr[x][1].y == e.offsetY)||
+					(arr[x][1].x - l == e.offsetX && arr[x][1].y == e.offsetY)||
+					(arr[x][1].x == e.offsetX && arr[x][1].y - l == e.offsetY)){
+						console.log("found");
+						arrId = arr[x][0];
+						context.lineWidth = arr[x][1].rad*2.5;
+					}
 				}
 			}
 
