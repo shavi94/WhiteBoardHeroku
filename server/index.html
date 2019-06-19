@@ -7,7 +7,19 @@
 	<link rel="stylesheet" href="/static/master.css">
 </head>
 <body>
+	
+	<div id="namesWrapper">
+		<h2>E-Learning</h2>
+		<p>Create Username: </p>
+		<div id="error"></div>
+		<form id="usernameForm">
+			<input type="text" id="username" size="35">
+			<input type="submit" value="submit">
+		</form>
+	</div>
+	<div>
 	<div id="whiteboardWrapper">
+		<h2>White Board</h2>
 		<div id="toolbar">
 			<div id="rad">
 				Radius <span id="radval">2</span>
@@ -30,17 +42,8 @@
 		</canvas>
 	</div>
 	<div id="chatbox">
-		<div id="namesWrapper">
-			<h2>ChatIO</h2>
-			<p>Create Username: </p>
-			<div id="error"></div>
-			<form id="usernameForm">
-				<input type="text" id="username" size="35">
-				<input type="submit" value="submit">
-			</form>
-		</div>
 		<div id="mainWrapper">
-			<h2>ChatIO</h2>
+			<h2>Chat Box</h2>
 			<div id="chatWrapper">
 				<div id="chatWindow" class="ScrollStyle"></div>
 				<form id="messageForm">
@@ -57,6 +60,7 @@
 				<div id="users"></div>
 			</div>
 		</div>
+	</div>
 	</div>
 	<script src="/static/main.js" type="text/javascript"></script>
 	<script src="/static/radius.js" type="text/javascript"></script>

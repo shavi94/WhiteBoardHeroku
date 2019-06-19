@@ -72,6 +72,7 @@ body{
 #chatbox{
 	width: 700px;
 	margin: 0 auto;
+	float: right;
 }
 
 #chatWindow{
@@ -84,6 +85,7 @@ body{
 
 #whiteboardWrapper{
 	display: none;
+	float: left;
 }
 
 #chatWrapper{
@@ -115,6 +117,8 @@ body{
 	background: #f4f4f4;
 	padding: 10px;
 	margin-left: 20px;
+	width: 400px;
+	
 }
 
 input{
