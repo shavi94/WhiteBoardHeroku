@@ -68,7 +68,7 @@
 	<script src="/static/eraser.js" type="text/javascript"></script>
 	<script>
 		$(function(){
-			socket = io.connect('https://shielded-retreat-12671.herokuapp.com/');
+			socket = io.connect();
 			socket.on('mouse',newDrawing);
 			socket.on('erase',newErasing);
 			socket.on('eraseline',newErasingLine);
