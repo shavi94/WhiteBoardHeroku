@@ -17,6 +17,13 @@ context.lineWidth = radius*2;
 var putPoint = function(e){
 	if(dragging){
 		if(tooltype == "draw"){
+			if(e.touches!=undefined){
+				if(event.touches.length == 1){ 
+					let r = e.target.getBoundingClientRect();
+					e.offsetX = e.touches[0].pageX - r.left;  
+					e.offsetY = e.touches[0].pageY - r.top;
+				}
+			}
 			context.globalCompositeOperation = 'source-over';
 			context.lineTo(e.offsetX, e.offsetY);
 			context.stroke();
@@ -46,6 +53,13 @@ var putPoint = function(e){
 			drawing = true;
 
 		}else if(tooltype == "eraser"){
+			if(e.touches!=undefined){
+				if(event.touches.length == 1){ 
+					let r = e.target.getBoundingClientRect();
+					e.offsetX = e.touches[0].pageX - r.left;  
+					e.offsetY = e.touches[0].pageY - r.top;
+				}
+			}
 			context.globalCompositeOperation = 'destination-out';
 			context.lineTo(e.offsetX, e.offsetY);
 			context.stroke();
@@ -66,7 +80,13 @@ var putPoint = function(e){
 			erasing = true;
 
 		}else if(tooltype == "lineEraser"){
-
+			if(e.touches!=undefined){
+				if(event.touches.length == 1){ 
+					let r = e.target.getBoundingClientRect();
+					e.offsetX = e.touches[0].pageX - r.left;  
+					e.offsetY = e.touches[0].pageY - r.top;
+				}
+			}
 			var arrId;
 			for(var x=0; x<arr.length;x++){
 				for(var l=0; l<5;l++){
@@ -80,18 +100,19 @@ var putPoint = function(e){
 					(arr[x][1].x == e.offsetX && arr[x][1].y - l == e.offsetY)){
 						console.log("found");
 						arrId = arr[x][0];
-						context.lineWidth = arr[x][1].rad*2.5;
+						context.lineWidth = arr[x][1].rad*3;
 					}
 				}
 			}
 
 			for(var y=0; y<arr.length;y++){
 				if(arr[y][0]==arrId){
+					context.lineWidth = arr[y][1].rad*3;
 					context.globalCompositeOperation = 'destination-out';
 					context.lineTo(arr[y][1].x, arr[y][1].y);
 					context.stroke();
 					context.beginPath();
-					context.arc(arr[y][1].x, arr[y][1].y, arr[y][1].rad*1.2, 0, Math.PI*2);
+					context.arc(arr[y][1].x, arr[y][1].y, arr[y][1].rad*3, 0, Math.PI*2);
 					context.fill();
 					context.beginPath();
 					context.moveTo(arr[y][1].x, arr[y][1].y);
@@ -135,3 +156,7 @@ var disengage = function(e){
 canvas.addEventListener('mousedown',engage);
 canvas.addEventListener('mousemove',putPoint);
 canvas.addEventListener('mouseup',disengage);
+
+canvas.addEventListener('touchstart',engage,false);
+canvas.addEventListener('touchmove',putPoint,false);
+canvas.addEventListener('touchend',disengage,false);
