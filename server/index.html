@@ -14,6 +14,7 @@
 		<div id="error"></div>
 		<form id="usernameForm">
 			<input type="text" id="username" size="35">
+			<input type="text" id="room" size="35">
 			<input type="submit" value="submit">
 		</form>
 	</div>
@@ -78,7 +79,7 @@
 
 		  <div class="form-buttons">
 		  <input type="submit" value="Done" class="btn">
-		  <button id="closePoll" class="btn" >Cancel</button>
+		  <button type="button" id="closePoll" class="btn" >Cancel</button>
 		  </div>
 
 		</form>
@@ -90,7 +91,9 @@
 	<script src="/static/eraser.js" type="text/javascript"></script>
 	<script src="/static/poll.js" type="text/javascript"></script>
 	<script>
+		
 		$(function(){
+
 			socket = io.connect();
 			socket.on('mouse',newDrawing);
 			socket.on('erase',newErasing);
@@ -104,7 +107,6 @@
 			var $message = $('#message');
 			var $usernameForm = $('#usernameForm');
 			var $users = $('#users');
-			var $username = $('#username');
 			var $error = $('#error');
 			var $newfileup = $('#fileupload');
 			var $pollForm = $('#pollForm');
@@ -119,6 +121,16 @@
 			var imageReader = new FileReader();
 			var videoReader = new FileReader();
 			var file;
+
+			var urlParams = new URLSearchParams(window.location.search);
+			var username = urlParams.get('user');
+			var newroom = urlParams.get('roomid');
+
+			if(username==""){
+				alert("You have no access");
+			}else{
+				socket.emit('new user',username,newroom,newUser);
+			}
 
 			$('#fileselect').change(function(e){
     
@@ -190,15 +202,18 @@
 
 
 
-			$usernameForm.submit(function(e){
-				e.preventDefault();
-				console.log($username.val());
-				if($username.val()==""){
-					$('#error').html("username is not valid");
-				}else{
-					socket.emit('new user',$username.val(),newUser);
-				}
-			});
+			// $usernameForm.submit(function(e){
+			
+			// 	var newroom = $('#room').val();
+			// 	e.preventDefault();
+			// 	console.log($username.val());
+			// 	if($username.val()==""){
+			// 		$('#error').html("username is not valid");
+			// 	}else{
+			// 		socket.emit('create',newroom);
+			// 		socket.emit('new user',$username.val(),newroom,newUser);
+			// 	}
+			// });
 
 			$messageForm.submit(function(e){
 				e.preventDefault();
@@ -214,9 +229,9 @@
 			$pollForm.submit(function(e){
 				e.preventDefault();
 				// alert(quest.val()+'  '+opt1.val()+'  '+opt2.val()+'  '+opt3.val());
-				var id = Date.now();
+				var id = Date.now()+newroom;
 				socket.emit('create poll',quest.val(),opt1.val(),opt2.val(),opt3.val(),id);
-				$('#chatWindow').append('<br><strong>You have created the following poll</strong><br>'+quest.val()+ '<br>'+
+				$('#chatWindow').append('<br><strong>You have created the following poll...</strong><br>'+quest.val()+ '<br>'+
 				'1) '+opt1.val()+'<br>2) '+opt2.val()+'<br>3) '+opt3.val()+'<br>'+
 				'<p id="'+id+'" class="pointer results">See Results</p>');
 				$('#myForm').hide();

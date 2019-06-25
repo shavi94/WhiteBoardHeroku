@@ -32,6 +32,11 @@ function newConnection(socket){
     socket.on('vote categorize',voteCategorize);
     socket.on('vote result',voteResults);
 
+    function createroom(room){
+        
+        socket.join(room);
+    }
+
     function voteResults(id){
         var lab1;
         var lab2;
@@ -78,60 +83,80 @@ function newConnection(socket){
 
     function createPoll(quiz,opt1,opt2,opt3,id){
         var name = socket.username;
+        var roomid = socket.room;
         var dataArr = [id, {
             label1 : opt1,
             label2 : opt2,
             label3 : opt3
         }];
         labels.push(dataArr);
-        socket.broadcast.emit('pollonchat',quiz,opt1,opt2,opt3,name,id);
+        socket.broadcast.to(roomid).emit('pollonchat',quiz,opt1,opt2,opt3,name,id);
     }
 
     //share files
     function sharefile(dataURI,type){
         var name = socket.username;
-        socket.broadcast.emit('file', dataURI,type,name);
+        var id = socket.room;
+        socket.broadcast.to(id).emit('file', dataURI,type,name);
     }
 
     //new user connect
-    function newUser(data,callback){
+    function newUser(data,nroom,callback){
+        console.log(data+' and '+nroom);
         if(usernames.indexOf(data) != -1){
             callback(false);
         }else{
             callback(true);
             socket.username = data;
-            usernames.push(socket.username);
-            updateUserNames();
+            socket.room = nroom;
+            var dataArr = [socket.username, {
+                room : socket.room
+            }];
+            usernames.push(dataArr);
+            console.log(usernames);
+            createroom(nroom);
+            updateUserNames(nroom);
 
         }
     }
 
     //update online users
-    function updateUserNames(){
-        io.sockets.emit('usernames',usernames);
+    function updateUserNames(room){
+        var chatusers = [];
+        for(var x=0; x<usernames.length;x++){
+            if(usernames[x][1].room==room){
+                chatusers.push(usernames[x][0]);
+            }
+        }
+        io.sockets.in(room).emit('usernames',chatusers);
     }
 
     //send chat message
     function sendmessage(data){
-        socket.broadcast.emit('sendmessage',{msg: data, user: socket.username});
+        var id = socket.room;
+
+        socket.broadcast.to(id).emit('sendmessage',{msg: data, user: socket.username});
         console.log('chat: '+data);
     }
 
     //send drawing
     function mouseMsg(data){
-        socket.broadcast.emit('mouse',data);
+        var id = socket.room;
+        socket.broadcast.to(id).emit('mouse',data);
         console.log(data);
     }
 
     //send erasing details
     function eraseMsg(data){
-        socket.broadcast.emit('erase',data);
+        var id = socket.room;
+        socket.broadcast.to(id).emit('erase',data);
         console.log("erase" + data);
     }
 
     //send line erasing details
     function eraseLineMsg(data){
-        socket.broadcast.emit('eraseline',data);
+        var id = socket.room;
+        socket.broadcast.to(id).emit('eraseline',data);
         console.log("eraseLine" + data);
     }
 
@@ -142,8 +167,13 @@ function newConnection(socket){
         if(!socket.username){
             return;
         }
-        usernames.splice(usernames.indexOf(socket.username),1);
-        updateUserNames();
+        // usernames.splice(usernames.indexOf(socket.username),1);
+        for(var x=0;x<usernames.length;x++){
+            if(usernames[x][0]==socket.username){
+                usernames.splice(x,1);
+            }
+        }
+        updateUserNames(socket.room);
     })
 
 }
