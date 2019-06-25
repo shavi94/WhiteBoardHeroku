@@ -24,6 +24,8 @@ var putPoint = function(e){
 					e.offsetY = e.touches[0].pageY - r.top;
 				}
 			}
+			setRadius(parseFloat(radSpan.innerHTML));
+			setSwatch({target: document.getElementsByClassName('active')[0]});
 			context.globalCompositeOperation = 'source-over';
 			context.lineTo(e.offsetX, e.offsetY);
 			context.stroke();
