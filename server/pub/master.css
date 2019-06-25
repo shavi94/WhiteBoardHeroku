@@ -70,7 +70,7 @@ body{
 }
 
 #chatbox{
-	display: none;
+	
 	width: 540px;
 	margin: 0 auto;
 	float: right;
@@ -81,11 +81,11 @@ body{
 }
 
 #mainWrapper{
-	display: none;
+	
 }
 
 #whiteboardWrapper{
-	display: none;
+	
 	float: left;
 }
 
@@ -113,6 +113,7 @@ body{
 }
 
 #namesWrapper{
+	display: none;
 	float: left;
 	border: 1px #ccc solid;
 	border-radius: 10px;
@@ -133,6 +134,7 @@ input:not([type=radio])
 {
     max-height: 300px;
 	overflow-y: scroll;
+	padding: 5px;
 	
 }
 
