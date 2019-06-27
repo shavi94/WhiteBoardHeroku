@@ -3,6 +3,7 @@
 	<meta charset="utf-8">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	<title>Drawing App</title>
 	<link rel="stylesheet" href="/static/master.css">
 </head>
@@ -84,6 +85,13 @@
 
 		</form>
 	  </div>
+	  <div class="form-popup" id="pollresults">
+		  <div class="modal-content">
+			  <button id="closechart" class="btn" >Close</button>
+			  <button id="sharechart" class="btn" >Share</button>
+			<div id="chartDiv"></div>
+		</div>
+	  </div>
 	</div>
 	<script src="/static/main.js" type="text/javascript"></script>
 	<script src="/static/radius.js" type="text/javascript"></script>
@@ -94,7 +102,9 @@
 		
 		$(function(){
 
-			socket = io.connect();
+			socket = io.connect('',{
+        	'reconnect': false
+    		});
 			socket.on('mouse',newDrawing);
 			socket.on('erase',newErasing);
 			socket.on('eraseline',newErasingLine);
@@ -102,6 +112,9 @@
 			socket.on('usernames',getUsernames);
 			socket.on('file',sharefile);
 			socket.on('pollonchat',polltochatbox);
+			socket.on('graph array',plotgraph);
+			socket.on('disconnect',disconnectUser);
+			socket.on('graphdetailsshare',graphdetailssharelink);
 			
 			var $messageForm = $('#messageForm');
 			var $message = $('#message');
@@ -116,6 +129,8 @@
 			var opt1 = $('#opt1');
 			var opt2 = $('#opt2');
 			var opt3 = $('#opt3');
+			var arraytoshare = [];
+			var layoutshare;
 
 			
 			var imageReader = new FileReader();
@@ -181,7 +196,7 @@
 			imageReader.onload=function(e){
     
 				// append image to own interface
-				$('#chatWindow').append('<strong>Me </strong>: <li><img src="' + e.target.result + '" height="150px" /><li>');
+				$('#chatWindow').append('<br><br><strong>Me </strong>: <li><img src="' + e.target.result + '" height="150px" /><li>');
 				
 				scrollDown();
 
@@ -192,7 +207,7 @@
 			videoReader.onload=function(e){
     
 				// append video to own interface
-				$('#chatWindow').append('<strong>Me </strong>: <li><video width="320" height="240" controls><source src="' + e.target.result + '"><li>');
+				$('#chatWindow').append('<br><br><strong>Me </strong>: <li><video width="320" height="240" controls><source src="' + e.target.result + '"><li>');
 				
 				scrollDown();
 
@@ -219,7 +234,7 @@
 				e.preventDefault();
 				if($message.val()!=""){
 					socket.emit('sendmessage',$message.val());
-					$('#chatWindow').append('<strong>Me </strong>: '+$message.val()+ '<br>');
+					$('#chatWindow').append('<br><br><strong>Me </strong>: '+$message.val());
 					$message.val('');
 					scrollDown();
 				}
@@ -231,29 +246,72 @@
 				// alert(quest.val()+'  '+opt1.val()+'  '+opt2.val()+'  '+opt3.val());
 				var id = Date.now()+newroom;
 				socket.emit('create poll',quest.val(),opt1.val(),opt2.val(),opt3.val(),id);
-				$('#chatWindow').append('<br><strong>You have created the following poll...</strong><br>'+quest.val()+ '<br>'+
-				'1) '+opt1.val()+'<br>2) '+opt2.val()+'<br>3) '+opt3.val()+'<br>'+
-				'<p id="'+id+'" class="pointer results">See Results</p>');
+				if(opt3.val()==""){
+					$('#chatWindow').append('<br><br><strong>You have created the following poll...</strong><br>'+quest.val()+ '<br>'+
+					'1) '+opt1.val()+'<br>2) '+opt2.val()+'<br>'+
+					'<p id="'+id+'" class="pointer results">See Results</p>');
+				}else{
+					$('#chatWindow').append('<br><br><strong>You have created the following poll...</strong><br>'+quest.val()+ '<br>'+
+					'1) '+opt1.val()+'<br>2) '+opt2.val()+'<br>3) '+opt3.val()+'<br>'+
+					'<p id="'+id+'" class="pointer results">See Results</p>');
+				}
 				$('#myForm').hide();
 				scrollDown();
 				
 				$('.results').unbind("click").click(function(e){
 					var nid = $(this).prop("id");
 					socket.emit('vote result',nid);
+					$('#chartDiv').show();
+					$('#pollresults').show();
 				});
 				
 			});
 
 		});
 
+		function graphdetailssharelink(){
+			$('#chatWindow').append('<br><small><em><p class="pointer graphshare">See vote details</p></em><small>');
+			scrollDown();
+			$('.graphshare').unbind("click").click(function(e){
+				$('#chartDiv').show();
+				$('#pollresults').show();
+				$('#sharechart').attr('disabled',true);
+				$('#sharechart').hide();
+				$('#sharechart').unbind('click');
+			});
+		}
+
+		function disconnectUser(){
+			console.log('disconnected');
+			if(alert("Connection Lost!"+ "\n"+ "Press OK to Reconnect...")){
+
+			}
+			else{
+				window.location.reload(); 
+			}
+		}
+
+		function plotgraph(graphArray,layout){
+			Plotly.newPlot('chartDiv', graphArray, layout);
+			arraytoshare = graphArray;
+			layoutshare = layout;
+		}
+
 		function polltochatbox(quiz,opt1,opt2,opt3,user,id){
 			var newId = id+"Btn";
 			var newopt = id+"Opt";
-			$('#chatWindow').append('<br><strong><center>*************** NEW POLL ***************</strong></center><br> '+quiz+ '<br>'+
-			'<label><input type="radio" name="'+newopt+'" data-value='+opt1+' value='+opt1+'>'+opt1+'</label><br>'+
-			'<label><input type="radio" name="'+newopt+'" data-value='+opt2+' value='+opt2+'>'+opt2+'</label><br>'+
-			'<label><input type="radio" name="'+newopt+'" data-value='+opt3+' value='+opt3+'>'+opt3+'</label><br>'+
-			'<input type="submit" id="'+id+'" class="voteBtn" value="Submit"><br><br>');
+			if(opt3==""){
+				$('#chatWindow').append('<br><br><strong><center>****************** NEW POLL ******************</strong></center><br> '+quiz+ '<br>'+
+				'<label><input type="radio" name="'+newopt+'" data-value='+opt1+' value='+opt1+'>'+opt1+'</label><br>'+
+				'<label><input type="radio" name="'+newopt+'" data-value='+opt2+' value='+opt2+'>'+opt2+'</label><br>'+
+				'<input type="submit" id="'+id+'" class="voteBtn" value="Submit">');
+			}else{
+				$('#chatWindow').append('<br><br><strong><center>****************** NEW POLL ******************</strong></center><br> '+quiz+ '<br>'+
+				'<label><input type="radio" name="'+newopt+'" data-value='+opt1+' value='+opt1+'>'+opt1+'</label><br>'+
+				'<label><input type="radio" name="'+newopt+'" data-value='+opt2+' value='+opt2+'>'+opt2+'</label><br>'+
+				'<label><input type="radio" name="'+newopt+'" data-value='+opt3+' value='+opt3+'>'+opt3+'</label><br>'+
+				'<input type="submit" id="'+id+'" class="voteBtn" value="Submit">');
+			}
 			$('#myForm').hide();
 			scrollDown();
 
@@ -265,6 +323,9 @@
 					socket.emit("vote categorize",value,nid);
 					$('#'+id).attr('disabled',true);
 					$('input[name="'+newopt+'"]').attr('disabled', 'disabled');
+					$('#chatWindow').append('<br><small><em>You have vote successfully</em><small>');
+					scrollDown();
+					$(this).unbind('click');
             	}else{
 					alert("Pick your answer");
 				}
@@ -281,11 +342,11 @@
 		function appendFile(URI,type,name){
 
 			if (type === 'image'){
-				$('#chatWindow').append('<strong>'+name+'</strong> : <br><li><img src="' + URI + '" height="150px" /><li>');
+				$('#chatWindow').append('<br><br><strong>'+name+'</strong> : <br><li><img src="' + URI + '" height="150px" /><li>');
 						scrollDown();
 			}
 			else {
-				$('#chatWindow').append('<strong>'+name+'</strong> : <br><li><video width="320" height="240" controls><source src="' + URI + '"><li>');
+				$('#chatWindow').append('<br><br><strong>'+name+'</strong> : <br><li><video width="320" height="240" controls><source src="' + URI + '"><li>');
 						scrollDown();
 			}
 		}
@@ -310,7 +371,7 @@
 		}
 
 		function newnewmessage(data){
-			$('#chatWindow').append('<strong>'+data.user+'</strong> : '+data.msg+ '<br>');
+			$('#chatWindow').append('<br><br><strong>'+data.user+'</strong> : '+data.msg);
 			scrollDown();
 
 		}
