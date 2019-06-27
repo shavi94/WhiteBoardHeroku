@@ -11,3 +11,15 @@ openFormPollBtn.addEventListener('click',function(){
 closePoll.addEventListener('click',function(){
     document.getElementById("myForm").style.display = "none";
 });
+
+closechart.addEventListener('click',function(){
+    $('#chartDiv').hide();
+	$('#pollresults').hide();
+});
+
+sharechart.addEventListener('click',function(){
+    socket.emit('share graph',arraytoshare,layoutshare);
+    $('#chartDiv').hide();
+    $('#pollresults').hide();
+    $('#chatWindow').append('<br><small><em>You have share the vote graph</em><small>');
+})
