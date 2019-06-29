@@ -104,7 +104,9 @@
 		$(function(){
 
 			socket = io.connect('',{
-        	'reconnect': false
+			reconnection: false,
+			pingTimeout: 60000,
+			timeout: 60000
     		});
 			socket.on('mouse',newDrawing);
 			socket.on('erase',newErasing);
