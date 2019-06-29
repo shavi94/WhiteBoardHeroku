@@ -107,7 +107,7 @@ body{
 	padding: 10px;
 	margin-left: 20px;
 	width: 150px;
-	max-height: 200px;
+	max-height: 310px;
 	word-wrap: break-word;
 
 }
@@ -200,4 +200,33 @@ form
 	overflow: auto; /* Enable scroll if needed */
 	background-color: rgb(0,0,0); /* Fallback color */
 	background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+
+  .containerchatmessage {
+	border: 2px solid #dedede;
+	background-color: #f1f1f1;
+	border-radius: 5px;
+	padding: 10px;
+	margin: 10px 0;
+  }
+
+  .containerchatmessage::after {
+	content: "";
+	clear: both;
+	display: table;
+  }
+
+  .time-right {
+	float: right;
+	color: #aaa;
+  }
+  
+  .time-left {
+	float: left;
+	color: #999;
+  }
+
+  .darker {
+	border-color: #ccc;
+	background-color: #ddd;
   }
