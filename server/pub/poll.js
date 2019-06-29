@@ -21,5 +21,6 @@ sharechart.addEventListener('click',function(){
     socket.emit('share graph',arraytoshare,layoutshare);
     $('#chartDiv').hide();
     $('#pollresults').hide();
-    $('#chatWindow').append('<br><small><em>You have share the vote graph</em><small>');
+    $('#chatWindow').append('<p><small><em>You have share the vote graph</em><small></p>');
+    scrollDown();
 })

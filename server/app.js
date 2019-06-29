@@ -149,10 +149,11 @@ function newConnection(socket){
     }
 
     //share files
-    function sharefile(dataURI,type){
+    function sharefile(dataURI,type,filename){
         var name = socket.username;
         var id = socket.room;
-        socket.broadcast.to(id).emit('file', dataURI,type,name);
+        console.log(filename);
+        socket.broadcast.to(id).emit('file', dataURI,type,name,filename);
     }
 
     //new user connect
